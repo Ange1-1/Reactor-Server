@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     printf("connect ok.\n");
     printf("开始时间：%d\n", time(0));
 
-    for (int ii = 0; ii < 100000; ii++)
+    for (int ii = 0; ii < 10; ii++)
     {
         memset(buf, 0, sizeof(buf));
         sprintf(buf, "这是第%d个超级女生。", ii);
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         memset(buf, 0, sizeof(buf));
         recv(sockfd, buf, len, 0); // 读取报文内容。
 
-        //printf("recv:%s\n", buf);
+        printf("recv:%s\n", buf);
     }
     printf("结束时间：%d\n", time(0));
 }
