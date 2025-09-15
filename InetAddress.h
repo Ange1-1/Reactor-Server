@@ -11,7 +11,7 @@ private:
     sockaddr_in addr_;        // 表示地址协议的结构体。
 public:
     InetAddress();
-    InetAddress(const std::string &ip,uint16_t port);      // 如果是监听的fd，用这个构造函数。
+    InetAddress(std::string_view ip,uint16_t port);      // 如果是监听的fd，用这个构造函数。
     InetAddress(const sockaddr_in addr);                       // 如果是客户端连上来的fd，用这个构造函数。
     ~InetAddress();
 

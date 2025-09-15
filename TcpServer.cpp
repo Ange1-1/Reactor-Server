@@ -1,6 +1,6 @@
 #include "TcpServer.h"
 
-TcpServer::TcpServer(const std::string &ip,const uint16_t port,int threadnum)
+TcpServer::TcpServer(std::string_view ip,const uint16_t port,int threadnum)
                  :threadnum_(threadnum),mainloop_(new EventLoop(true)), 
                   acceptor_(mainloop_.get(),ip,port),threadpool_(threadnum_,"IO")
 {

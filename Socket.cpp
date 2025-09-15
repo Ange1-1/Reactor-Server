@@ -74,7 +74,7 @@ void Socket::bind(const InetAddress& servaddr)
 }
 
  // 设置ip_和port_成员。
- void Socket::setipport(const std::string &ip,uint16_t port)   
+ void Socket::setipport(std::string_view ip,uint16_t port)   
  {
     ip_=ip;
     port_=port;

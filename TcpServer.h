@@ -28,7 +28,7 @@ private:
     std::function<void(EventLoop*)>  timeoutcb_;                         // 回调上层业务类HandleTimeOut()。
     std::function<void(int)>  removeconnectioncb_;                      // 回调上层业务类的HandleRemove()。
 public:
-    TcpServer(const std::string &ip,const uint16_t port,int threadnum=3);
+    TcpServer(std::string_view ip,const uint16_t port,int threadnum=3);
     ~TcpServer();
 
     void start();          // 运行事件循环。 

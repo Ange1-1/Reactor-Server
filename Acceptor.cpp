@@ -1,6 +1,6 @@
 #include "Acceptor.h"
 
-Acceptor::Acceptor(EventLoop* loop,const std::string &ip,const uint16_t port)
+Acceptor::Acceptor(EventLoop* loop,std::string_view ip,const uint16_t port)
                :loop_(loop),servsock_(createnonblocking()),acceptchannel_(loop_,servsock_.fd())
 {
     InetAddress servaddr(ip,port);             // 服务端的地址和协议。

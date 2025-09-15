@@ -5,10 +5,10 @@ InetAddress::InetAddress()
 
 }
 
-InetAddress::InetAddress(const std::string &ip,uint16_t port)      // 如果是监听的fd，用这个构造函数。
+InetAddress::InetAddress(std::string_view ip,uint16_t port)      // 如果是监听的fd，用这个构造函数。
 {
     addr_.sin_family = AF_INET;                                 // IPv4网络协议的套接字类型。
-    addr_.sin_addr.s_addr = inet_addr(ip.c_str());      // 服务端用于监听的ip地址。
+    addr_.sin_addr.s_addr = inet_addr(ip.data());      // 服务端用于监听的ip地址。
     addr_.sin_port = htons(port);                              // 服务端用于监听的端口。
 }
 

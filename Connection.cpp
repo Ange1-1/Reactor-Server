@@ -129,7 +129,7 @@ void Connection::send(const char *data,size_t size)
 }
 
 // 发送数据，如果当前线程是IO线程，直接调用此函数，如果是工作线程，将把此函数传给IO线程去执行。
-void Connection::sendinloop(const std::string &data)
+void Connection::sendinloop(std::string_view data)
 {
     outputbuffer_.appendwithsep(std::string_view(data.data(),data.size()));    // 把需要发送的数据保存到Connection的发送缓冲区中。
     clientchannel_->enablewriting();    // 注册写事件。
