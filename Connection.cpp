@@ -110,7 +110,7 @@ void Connection::onmessage()
 }
 
 // 发送数据，不管在任何线程中，都是调用此函数发送数据。
-void Connection::send(const char *data,size_t size)        
+void Connection::send(std::string_view data)        
 {
     if (disconnect_==true) {  printf("客户端连接已断开了，send()直接返回。\n"); return;}
 
@@ -118,13 +118,13 @@ void Connection::send(const char *data,size_t size)
     {
         // 如果当前线程是IO线程，直接调用sendinloop()发送数据。
         // printf("send() 在事件循环的线程中。\n");
-        sendinloop(std::string(data,size));
+        sendinloop(std::string(data));
     }
     else
     {
         // 如果当前线程不是IO线程，调用EventLoop::queueinloop()，把sendinloop()交给事件循环线程去执行。
         // printf("send() 不在事件循环的线程中。\n");
-        loop_->queueinloop(std::bind(&Connection::sendinloop,this,std::string(data,size)));
+        loop_->queueinloop(std::bind(&Connection::sendinloop,this,std::string(data)));
     }
 }
 

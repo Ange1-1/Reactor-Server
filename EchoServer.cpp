@@ -85,7 +85,7 @@ void EchoServer::HandleMessage(spConnection conn,std::string_view message)
 
     // 在这里，将经过若干步骤的运算。
     std::string newmessage="reply:"+std::string(message);          // 回显业务。
-    conn->send(newmessage.data(),newmessage.size());   // 把数据发送出去。 
+    conn->send(newmessage);   // 把数据发送出去。 
  }
 
 // 数据发送完成后，在TcpServer类中回调此函数。

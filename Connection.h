@@ -50,7 +50,7 @@ public:
     void setsendcompletecallback(std::function<void(spConnection)> fn);    // 发送数据完成后的回调函数。
 
     // 发送数据，不管在任何线程中，都是调用此函数发送数据。
-    void send(const char *data,size_t size);        
+    void send(std::string_view data);        
     // 发送数据，如果当前线程是IO线程，直接调用此函数，如果是工作线程，将把此函数传给IO线程去执行。
     void sendinloop(std::string_view data);        
 
