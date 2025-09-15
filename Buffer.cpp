@@ -11,22 +11,23 @@ Buffer::~Buffer()
 }
 
 // 把数据追加到buf_中。
-void Buffer::append(const char *data,size_t size)             
+void Buffer::append(std::string_view data)             
 {
-    buf_.append(data,size);
+    buf_.append(data.data(),data.size());
 }
 
  // 把数据追加到buf_中，附加报文分隔符。
- void Buffer::appendwithsep(const char *data,size_t size)  
+ void Buffer::appendwithsep(std::string_view data)  
  {
     if (sep_==0)             // 没有分隔符。
     {
-        buf_.append(data,size);                    // 处理报文内容。
+        buf_.append(data.data(),data.size());                    // 处理报文内容。
     }
     else if (sep_==1)     // 四字节的报头。
     {
+        int size=data.size();
         buf_.append((char*)&size,4);           // 处理报文长度（头部）。
-        buf_.append(data,size);                    // 处理报文内容。
+        buf_.append(data.data(),data.size());                    // 处理报文内容。
     }
     // 其它的代码请各位自己完善。
  }

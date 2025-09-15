@@ -80,7 +80,7 @@ void Connection::onmessage()
         ssize_t nread = read(fd(), buffer, sizeof(buffer));
         if (nread > 0)      // 成功的读取到了数据。
         {
-            inputbuffer_.append(buffer,nread);      // 把读取的数据追加到接收缓冲区中。
+            inputbuffer_.append(std::string_view(buffer,nread));      // 把读取的数据追加到接收缓冲区中。
         } 
         else if (nread == -1 && errno == EINTR) // 读取数据的时候被信号中断，继续读取。
         {  
@@ -131,7 +131,7 @@ void Connection::send(const char *data,size_t size)
 // 发送数据，如果当前线程是IO线程，直接调用此函数，如果是工作线程，将把此函数传给IO线程去执行。
 void Connection::sendinloop(const std::string &data)
 {
-    outputbuffer_.appendwithsep(data.data(),data.size());    // 把需要发送的数据保存到Connection的发送缓冲区中。
+    outputbuffer_.appendwithsep(std::string_view(data.data(),data.size()));    // 把需要发送的数据保存到Connection的发送缓冲区中。
     clientchannel_->enablewriting();    // 注册写事件。
 }
 

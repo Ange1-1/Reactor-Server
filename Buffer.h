@@ -2,6 +2,7 @@
 #include <string>
 #include <cstring>
 #include <iostream>
+#include <string_view>
 
 class Buffer
 {
@@ -13,8 +14,8 @@ public:
     Buffer(uint16_t sep=1);
     ~Buffer();
 
-    void append(const char *data,size_t size);                 // 把数据追加到buf_中。
-    void appendwithsep(const char *data,size_t size);    // 把数据追加到buf_中，附加报文分隔符。
+    void append(std::string_view data);                 // 把数据追加到buf_中。
+    void appendwithsep(std::string_view data);    // 把数据追加到buf_中，附加报文分隔符。
     void erase(size_t pos,size_t nn);                                 // 从buf_的pos开始，删除nn个字节，pos从0开始。
     size_t size();                                                                // 返回buf_的大小。
     const char *data();                                                      // 返回buf_的首地址。
