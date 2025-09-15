@@ -1,6 +1,6 @@
 #include "ThreadPool.h"
 
-ThreadPool::ThreadPool(size_t threadnum,const std::string& threadtype):stop_(false),threadtype_(threadtype)
+ThreadPool::ThreadPool(size_t threadnum,std::string_view threadtype):stop_(false),threadtype_(threadtype)
 {
     // 启动threadnum个线程，每个线程将阻塞在条件变量上。
 	for (size_t ii = 0; ii < threadnum; ii++)
