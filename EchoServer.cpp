@@ -62,31 +62,30 @@ void EchoServer::HandleError(spConnection conn)
 }
 
 // 处理客户端的请求报文，在TcpServer类中回调此函数。
-void EchoServer::HandleMessage(spConnection conn,std::string& message)     
+void EchoServer::HandleMessage(spConnection conn,std::string_view message)     
 {
     // printf("EchoServer::HandleMessage() thread is %d.\n",syscall(SYS_gettid)); 
 
     if (threadpool_.size()==0)
     {
         // 如果没有工作线程，表示在IO线程中计算。
-        OnMessage(conn,message);       
+        OnMessage(conn,std::string(message));       
     }
     else
     {
         // 把业务添加到线程池的任务队列中，交给工作线程去处理业务。
-        threadpool_.addtask(std::bind(&EchoServer::OnMessage,this,conn,message));
+        threadpool_.addtask(std::bind(&EchoServer::OnMessage,this,conn,std::string(message)));
     }
 }
 
  // 处理客户端的请求报文，用于添加给线程池。
- void EchoServer::OnMessage(spConnection conn,std::string& message)     
+ void EchoServer::OnMessage(spConnection conn,std::string_view message)     
  {
     // printf("%s message (fd=%d):%s\n",Timestamp::now().tostring().c_str(),conn->fd(),message.c_str());
 
     // 在这里，将经过若干步骤的运算。
-    message="reply:"+message;          // 回显业务。
-    
-    conn->send(message.data(),message.size());   // 把数据发送出去。 
+    std::string newmessage="reply:"+std::string(message);          // 回显业务。
+    conn->send(newmessage.data(),newmessage.size());   // 把数据发送出去。 
  }
 
 // 数据发送完成后，在TcpServer类中回调此函数。
