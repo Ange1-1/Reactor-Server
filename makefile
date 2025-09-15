@@ -1,4 +1,4 @@
-all:client echoserver client1 bankserver
+all:client echoserver
 
 client:client.cpp
 	g++ -g -o client client.cpp
