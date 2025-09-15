@@ -138,7 +138,7 @@ void EventLoop::handletimer()
     else
     {
         // printf("从事件循环的闹钟时间到了。\n"); 
-        time_t now=time(0);         // 获取当前时间。
+        time_t now=Timestamp::now().timestamp();         // 获取当前时间。
         std::vector<int> timeout_fds;
         for(auto aa:conns_)
         {

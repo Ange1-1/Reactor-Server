@@ -42,7 +42,7 @@ void Epoll::updatechannel(Channel *ch)
  {
      if (ch->inpoll())         // 如果channel已经在树上了。
     {
-        if (epoll_ctl(epollfd_,EPOLL_CTL_DEL,ch->fd(),0)==-1)
+        if (epoll_ctl(epollfd_,EPOLL_CTL_DEL,ch->fd(),nullptr)==-1)
         {
             perror("epoll_ctl() failed.\n"); exit(-1);
         }

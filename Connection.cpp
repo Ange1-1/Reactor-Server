@@ -152,5 +152,5 @@ void Connection::writecallback()
  // 判断TCP连接是否超时（空闲太久）。
  bool Connection::timeout(time_t now,int val)           
  {
-    return now-lastatime_.toint()>val;    
+    return now-lastatime_.timestamp()>val;    
  }
