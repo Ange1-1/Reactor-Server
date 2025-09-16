@@ -26,7 +26,7 @@ void Buffer::append(std::string_view data)
     else if (sep_==1)     // 四字节的报头。
     {
         int size=data.size();
-        buf_.append((char*)&size,4);           // 处理报文长度（头部）。
+        buf_.append(reinterpret_cast<const char*>(&size),4);           // 处理报文长度（头部）。
         buf_.append(data.data(),data.size());                    // 处理报文内容。
     }
     // 其它的代码请各位自己完善。

@@ -34,7 +34,7 @@ uint16_t InetAddress::port() const                // 返回整数表示的端口
 
 const sockaddr *InetAddress::addr() const   // 返回addr_成员的地址，转换成了sockaddr。
 {
-    return (sockaddr*)&addr_;
+    return reinterpret_cast<const sockaddr*>(&addr_);
 }
 
 void InetAddress::setaddr(sockaddr_in clientaddr)   // 设置addr_成员的值。

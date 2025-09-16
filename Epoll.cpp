@@ -78,7 +78,7 @@ std::vector<Channel *> Epoll::loop(int timeout)
     // 如果infds>0，表示有事件发生的fd的数量。
     for (int ii=0;ii<infds;ii++)       // 遍历epoll返回的数组events_。
     {
-        Channel *ch=(Channel *)events_[ii].data.ptr;       // 取出已发生事件的channel。
+        Channel *ch=static_cast<Channel *>(events_[ii].data.ptr);       // 取出已发生事件的channel。
         ch->setrevents(events_[ii].events);                       // 设置channel的revents_成员。
         channels.push_back(ch);
     }
