@@ -4,12 +4,12 @@ EchoServer::EchoServer(std::string_view ip,const uint16_t port,int subthreadnum,
                    :tcpserver_(ip,port,subthreadnum),threadpool_(workthreadnum,"WORKS")
 {
     // 以下代码不是必须的，业务关心什么事件，就指定相应的回调函数。
-    tcpserver_.setnewconnectioncb(std::bind(&EchoServer::HandleNewConnection, this, std::placeholders::_1));
-    tcpserver_.setcloseconnectioncb(std::bind(&EchoServer::HandleClose, this, std::placeholders::_1));
-    tcpserver_.seterrorconnectioncb(std::bind(&EchoServer::HandleError, this, std::placeholders::_1));
-    tcpserver_.setonmessagecb(std::bind(&EchoServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-    tcpserver_.setsendcompletecb(std::bind(&EchoServer::HandleSendComplete, this, std::placeholders::_1));
-    tcpserver_.settimeoutcb(std::bind(&EchoServer::HandleTimeOut, this, std::placeholders::_1));
+    tcpserver_.setnewconnectioncb([this](spConnection conn){this->HandleClose(conn);});
+    tcpserver_.setcloseconnectioncb([this](spConnection conn){this->HandleClose(conn);});
+    tcpserver_.seterrorconnectioncb([this](spConnection conn){this->HandleError(conn);});
+    tcpserver_.setonmessagecb([this](spConnection conn,std::string_view message){this->HandleMessage(conn,message);});
+    tcpserver_.setsendcompletecb([this](spConnection conn){this->HandleSendComplete(conn);});
+    tcpserver_.settimeoutcb([this](EventLoop *loop){this->HandleTimeOut(loop);});
 }
 
 EchoServer::~EchoServer()
@@ -74,7 +74,7 @@ void EchoServer::HandleMessage(spConnection conn,std::string_view message)
     else
     {
         // 把业务添加到线程池的任务队列中，交给工作线程去处理业务。
-        threadpool_.addtask(std::bind(&EchoServer::OnMessage,this,conn,std::string(message)));
+        threadpool_.addtask([this,conn,message=std::string(message)](){this->OnMessage(conn,message);});
     }
 }
 

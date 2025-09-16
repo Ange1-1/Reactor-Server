@@ -18,10 +18,10 @@ EventLoop::EventLoop(bool mainloop,int timetvl,int timeout):ep_(std::make_unique
                    timerfd_(createtimerfd(timeout_)),timerchannel_(std::make_unique<Channel>(this,timerfd_))
 
 {
-    wakechannel_->setreadcallback(std::bind(&EventLoop::handlewakeup,this));
+    wakechannel_->setreadcallback([this](){this->handlewakeup();});
     wakechannel_->enablereading();
 
-    timerchannel_->setreadcallback(std::bind(&EventLoop::handletimer,this));
+    timerchannel_->setreadcallback([this](){this->handletimer();});
     timerchannel_->enablereading();
 }
 

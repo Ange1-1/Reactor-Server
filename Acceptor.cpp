@@ -11,7 +11,7 @@ Acceptor::Acceptor(EventLoop* loop,std::string_view ip,const uint16_t port)
     servsock_.bind(servaddr);
     servsock_.listen();
 
-    acceptchannel_.setreadcallback(std::bind(&Acceptor::newconnection,this));
+    acceptchannel_.setreadcallback([this](){this->newconnection();});
     acceptchannel_.enablereading();       // 让epoll_wait()监视servchannel的读事件。 
 }
 

@@ -4,10 +4,10 @@ Connection::Connection(EventLoop* loop,std::unique_ptr<Socket> clientsock)
                    :loop_(loop),clientsock_(std::move(clientsock)),disconnect_(false),clientchannel_(std::make_unique<Channel>(loop_,clientsock_->fd())) 
 {
     // 为新客户端连接准备读事件，并添加到epoll中。
-    clientchannel_->setreadcallback(std::bind(&Connection::onmessage,this));
-    clientchannel_->setclosecallback(std::bind(&Connection::closecallback,this));
-    clientchannel_->seterrorcallback(std::bind(&Connection::errorcallback,this));
-    clientchannel_->setwritecallback(std::bind(&Connection::writecallback,this));
+    clientchannel_->setreadcallback([this](){this->onmessage();});
+    clientchannel_->setclosecallback([this](){this->closecallback();});
+    clientchannel_->seterrorcallback([this](){this->errorcallback();});
+    clientchannel_->setwritecallback([this](){this->writecallback();});
     clientchannel_->useet();                 // 客户端连上来的fd采用边缘触发。
     clientchannel_->enablereading();   // 让epoll_wait()监视clientchannel的读事件
 }
@@ -125,7 +125,7 @@ void Connection::send(std::string_view data)
     {
         // 如果当前线程不是IO线程，调用EventLoop::queueinloop()，把sendinloop()交给事件循环线程去执行。
         // printf("send() 不在事件循环的线程中。\n");
-        loop_->queueinloop(std::bind(&Connection::sendinloop,this,std::string(data)));
+        loop_->queueinloop([this,data=std::string(data)](){this->sendinloop(data);});
     }
 }
 
