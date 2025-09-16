@@ -3,7 +3,7 @@
 #include <cstring>
 #include <iostream>
 #include <string_view>
-
+#include <optional>
 class Buffer
 {
 private:
@@ -20,5 +20,5 @@ public:
     size_t size();                                                                // 返回buf_的大小。
     const char *data();                                                      // 返回buf_的首地址。
     void clear();                                                                // 清空buf_。
-    bool pickmessage(std::string &ss);                           // 从buf_中拆分出一个报文，存放在ss中，如果buf_中没有报文，返回false。
+    std::optional<std::string> pickmessage();                           // 从buf_中拆分出一个报文，存放在ss中，如果buf_中没有报文，返回false。
 };

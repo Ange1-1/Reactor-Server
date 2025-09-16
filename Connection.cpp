@@ -88,16 +88,17 @@ void Connection::onmessage()
         } 
         else if (nread == -1 && ((errno == EAGAIN) || (errno == EWOULDBLOCK))) // 全部的数据已读取完毕。
         {
-            std::string message;
-
+            // std::string message;
+            std::optional<std::string> message;
             while (true)             // 从接收缓冲区中拆分出客户端的请求消息。
             {
-                if (inputbuffer_.pickmessage(message)==false) break;
+                message=inputbuffer_.pickmessage();
+                if (!message.has_value()) break;
 
                 // printf("message (fd=%d):%s\n",fd(),message.c_str());
                 lastatime_=Timestamp::now();             // 更新Connection的时间戳。
 
-                onmessagecallback_(shared_from_this(),message);       // 回调TcpServer::onmessage()处理客户端的请求消息。
+                onmessagecallback_(shared_from_this(),message.value());       // 回调TcpServer::onmessage()处理客户端的请求消息。
             }
             break;
         } 
