@@ -11,6 +11,7 @@
 #include <sys/syscall.h>
 #include <sys/timerfd.h>      // 定时器需要包含这个头文件。
 #include "Connection.h"
+#include<cstring>
 
 class Channel;
 class Epoll;

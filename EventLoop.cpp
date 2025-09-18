@@ -126,7 +126,7 @@ void EventLoop::handletimer()
 {
     // 重新计时。
     struct itimerspec timeout;                                // 定时时间的数据结构。
-    memset(&timeout,0,sizeof(struct itimerspec));
+    std::memset(&timeout,0,sizeof(struct itimerspec));
     timeout.it_value.tv_sec = timetvl_;                             // 定时时间，固定为5，方便测试。
     timeout.it_value.tv_nsec = 0;
     timerfd_settime(timerfd_,0,&timeout,0);

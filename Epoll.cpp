@@ -54,7 +54,6 @@ std::vector<Channel *> Epoll::loop(int timeout)
 {
     std::vector<Channel *> channels;        // 存放epoll_wait()返回的事件。
 
-    bzero(events_,sizeof(events_));
     int infds=epoll_wait(epollfd_,events_,MaxEvents,timeout);       // 等待监视的fd有事件发生。
 
     // 返回失败。
