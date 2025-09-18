@@ -140,11 +140,11 @@ void EventLoop::handletimer()
         // printf("从事件循环的闹钟时间到了。\n"); 
         time_t now=Timestamp::now().timestamp();         // 获取当前时间。
         std::vector<int> timeout_fds;
-        for(auto aa:conns_)
+        for(auto&[fd,conn] :conns_)
         {
-            if(aa.second->timeout(now,timeout_))
+            if(conn->timeout(now,timeout_))
             {
-                timeout_fds.push_back(aa.first);
+                timeout_fds.push_back(fd);
             }
         }
         for(auto fd:timeout_fds)
