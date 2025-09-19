@@ -72,13 +72,13 @@ void Connection::setsendcompletecallback(std::function<void(spConnection)> fn)
 // 处理对端发送过来的消息。
 void Connection::onmessage()
 {
-    char buffer[1024];
+    std::array<std::byte,1024> buffer;
     while (true)             // 由于使用非阻塞IO，一次读取buffer大小数据，直到全部的数据读取完毕。
     {    
-        ssize_t nread = read(fd(), buffer, sizeof(buffer));
+        ssize_t nread = ::recv(fd(), buffer.data(), sizeof(buffer),0);
         if (nread > 0)      // 成功的读取到了数据。
         {
-            inputbuffer_.append(std::string_view(buffer,nread));      // 把读取的数据追加到接收缓冲区中。
+            inputbuffer_.append(std::string_view(reinterpret_cast<char*>(buffer.data()),nread));      // 把读取的数据追加到接收缓冲区中。
         } 
         else if (nread == -1 && errno == EINTR) // 读取数据的时候被信号中断，继续读取。
         {  
