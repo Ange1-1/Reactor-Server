@@ -7,7 +7,7 @@ int createnonblocking()
     int listenfd = socket(AF_INET,SOCK_STREAM|SOCK_NONBLOCK,IPPROTO_TCP);
     if (listenfd < 0)
     {
-        printf("%s:%s:%d listen socket create error:%d\n", __FILE__, __FUNCTION__, __LINE__, errno); exit(-1);
+        std::println("{}:{}:{} listen socket create error:{}", __FILE__, __FUNCTION__, __LINE__, errno); exit(-1);
     }
     return listenfd;
 }

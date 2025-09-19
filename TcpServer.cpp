@@ -36,18 +36,18 @@ void TcpServer::start()
  {
     // 停止主事件循环。
     mainloop_->stop();
-    printf("主事件循环已停止。\n");
+    std::println("主事件循环已停止。");
 
     // 停止从事件循环。
     for (int ii=0;ii<threadnum_;ii++)
     {
         subloops_[ii]->stop();
     }
-    printf("从事件循环已停止。\n");
+    std::println("从事件循环已停止。");
 
     // 停止IO线程。
     threadpool_.stop();
-    printf("IO线程池停止。\n");
+    std::println("IO线程池停止。");
  }
 
 
@@ -64,7 +64,6 @@ void TcpServer::newconnection(std::unique_ptr<Socket> clientsock)
 
     //conn->enablereading();
 
-    // printf ("new connection(fd=%d,ip=%s,port=%d) ok.\n",conn->fd(),conn->ip().c_str(),conn->port());
 
     {
         std::lock_guard<std::mutex> gd(mmutex_);
@@ -80,7 +79,6 @@ void TcpServer::newconnection(std::unique_ptr<Socket> clientsock)
  {
     if (closeconnectioncb_) closeconnectioncb_(conn);       // 回调上层业务类的HandleClose()。
 
-    // printf("client(fd=%d) disconnected.\n",conn->fd());
     {
          std::lock_guard<std::mutex> gd(mmutex_);
         conns_.erase(conn->fd());        // 从map中删除conn。
@@ -92,7 +90,6 @@ void TcpServer::errorconnection(spConnection conn)
 {
     if (errorconnectioncb_) errorconnectioncb_(conn);     // 回调上层业务类的HandleError()。
 
-    // printf("client(fd=%d) error.\n",conn->fd());
     {
          std::lock_guard<std::mutex> gd(mmutex_);
         conns_.erase(conn->fd());      // 从map中删除conn。
@@ -108,7 +105,6 @@ void TcpServer::onmessage(spConnection conn,std::string& message)
 // 数据发送完成后，在Connection类中回调此函数。
 void TcpServer::sendcomplete(spConnection conn)     
 {
-    // printf("send complete.\n");
 
     if (sendcompletecb_) sendcompletecb_(conn);     // 回调上层业务类的HandleSendComplete()。
 }
@@ -116,7 +112,6 @@ void TcpServer::sendcomplete(spConnection conn)
 // epoll_wait()超时，在EventLoop类中回调此函数。
 void TcpServer::epolltimeout(EventLoop *loop)         
 {
-    // printf("epoll_wait() timeout.\n");
 
     if (timeoutcb_)  timeoutcb_(loop);           // 回调上层业务类的HandleTimeOut()。
 }

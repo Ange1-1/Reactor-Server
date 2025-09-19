@@ -81,15 +81,3 @@ std::optional<std::string> Buffer::pickmessage()
     return std::nullopt;
 }
 
-/*
-int main()
-{
-    std::string s1="aaaaaaaaaaaaab";
-    Buffer buf(1);
-    buf.appendwithsep(s1.data(),s1.size());
-    std::string s2;
-    buf.pickmessage(s2);
-    printf("s2=%s\n",s2.c_str());
-}
-// g++ -g -o test Buffer.cpp
-*/

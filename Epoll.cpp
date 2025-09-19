@@ -4,7 +4,7 @@ Epoll::Epoll()
 {
     if ((epollfd_=epoll_create(1))==-1)       // 创建epoll句柄（红黑树）。
     {
-        printf("epoll_create() failed(%d).\n",errno); exit(-1);
+        std::println("epoll_create() failed({}).",errno); exit(-1);
     }
 }
 

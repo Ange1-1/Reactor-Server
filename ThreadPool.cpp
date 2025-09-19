@@ -8,7 +8,7 @@ ThreadPool::ThreadPool(size_t threadnum,std::string_view threadtype):stop_(false
         // 用lambda函创建线程。
 		threads_.emplace_back([this]
         {
-            printf("create %s thread(%d).\n",threadtype_.c_str(),syscall(SYS_gettid));     // 显示线程类型和线程ID。
+            std::println("create {} thread({}).",threadtype_,syscall(SYS_gettid));     // 显示线程类型和线程ID。
 
 			while (stop_==false)
 			{
@@ -31,7 +31,6 @@ ThreadPool::ThreadPool(size_t threadnum,std::string_view threadtype):stop_(false
 					this->taskqueue_.pop();
 				}   // 锁作用域的结束。 ///////////////////////////////////
 
-                // printf("%s(%d) execute task.\n",threadtype_.c_str(),syscall(SYS_gettid));
 				task();  // 执行任务。
 			}
 		});
@@ -74,74 +73,3 @@ size_t ThreadPool::size()
     return threads_.size();
 }
 
-//////////////////////////////////////////////////////////////////
-/*
-void show(int no, const std::string &name)
-{
-    printf("小哥哥们好，我是第%d号超级女生%s。\n",no,name.c_str());
-}
-
-void test()
-{
-    printf("我有一只小小鸟。\n");
-}
-
-int main()
-{
-    ThreadPool threadpool(3);
-    
-    std::string name="西施";
-    threadpool.addtask(std::bind(show,8,name));
-    sleep(1);
-
-    threadpool.addtask(std::bind(test));
-    sleep(1);
-
-    threadpool.addtask(std::bind([]{ printf("我是一只傻傻鸟。\n");}));
-    sleep(1);
-}
-*/
-//////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////
-/*
-class AA
-{
-public:
-    void show()
-    {
-        printf("我是一只傻傻鸟。\n");
-    }
-
-    ~AA() 
-    {
-        printf("调用了析构函数。\n");
-    }
-};
-
-#include <memory>
-
-void fun(std::shared_ptr<AA> aa)
-{
-    sleep(5);
-    aa->show();
-}
-
-int main()
-{
-    ThreadPool tp(2,"TEST");
-
-    {
-        std::shared_ptr<AA> aa(new AA);
-        tp.addtask(std::bind(fun,aa));
-    }
-
-    sleep(10);   // 让线程有时间可以运行。
-
-    return 0;
-}
-*/
-//////////////////////////////////////////////////////////////////
-
-
-// g++ -o test ThreadPool.cpp -lpthread

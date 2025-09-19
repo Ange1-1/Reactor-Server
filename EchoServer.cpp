@@ -28,7 +28,7 @@ void EchoServer::Start()
  {
     // 停止工作线程。
     threadpool_.stop();
-    printf("工作线程已停止。\n");
+    std::println("工作线程已停止。");
 
     // 停止IO线程（事件循环）。
     tcpserver_.stop();
@@ -38,8 +38,7 @@ void EchoServer::Start()
 void EchoServer::HandleNewConnection(spConnection conn)    
 {
     // std::cout << "New Connection Come in." << std::endl;
-    // printf("EchoServer::HandleNewConnection() thread is %d.\n",syscall(SYS_gettid));
-    printf ("%s new connection(fd=%d,ip=%s,port=%d) ok.\n",Timestamp::now().tostring().c_str(),conn->fd(),conn->ip().c_str(),conn->port());
+    std::println ("{} new connection(fd={},ip={},port={}) ok.",Timestamp::now().tostring(),conn->fd(),conn->ip(),conn->port());
 
     // 根据业务的需求，在这里可以增加其它的代码。
 }
@@ -47,7 +46,7 @@ void EchoServer::HandleNewConnection(spConnection conn)
 // 关闭客户端的连接，在TcpServer类中回调此函数。 
 void EchoServer::HandleClose(spConnection conn)  
 {
-    printf ("%s connection closed(fd=%d,ip=%s,port=%d) ok.\n",Timestamp::now().tostring().c_str(),conn->fd(),conn->ip().c_str(),conn->port());
+    std::println("{} connection closed(fd={},ip={},port={}) ok.",Timestamp::now().tostring(),conn->fd(),conn->ip(),conn->port());
     // std::cout << "EchoServer conn closed." << std::endl;
 
     // 根据业务的需求，在这里可以增加其它的代码。
@@ -64,7 +63,6 @@ void EchoServer::HandleError(spConnection conn)
 // 处理客户端的请求报文，在TcpServer类中回调此函数。
 void EchoServer::HandleMessage(spConnection conn,std::string_view message)     
 {
-    // printf("EchoServer::HandleMessage() thread is %d.\n",syscall(SYS_gettid)); 
 
     if (threadpool_.size()==0)
     {
@@ -81,7 +79,6 @@ void EchoServer::HandleMessage(spConnection conn,std::string_view message)
  // 处理客户端的请求报文，用于添加给线程池。
  void EchoServer::OnMessage(spConnection conn,std::string_view message)     
  {
-    // printf("%s message (fd=%d):%s\n",Timestamp::now().tostring().c_str(),conn->fd(),message.c_str());
 
     // 在这里，将经过若干步骤的运算。
     std::string newmessage="reply:"+std::string(message);          // 回显业务。

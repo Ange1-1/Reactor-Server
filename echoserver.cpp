@@ -13,12 +13,12 @@ EchoServer *echoserver;
 
 void Stop(int sig)    // 信号2和15的处理函数，功能是停止服务程序。
 {
-    printf("sig=%d\n",sig);
+    std::println("sig={}",sig);
     // 调用EchoServer::Stop()停止服务。
     echoserver->Stop();
-    printf("echoserver已停止。\n");
+    std::println("echoserver已停止。");
     delete echoserver;
-    printf("delete echoserver。\n");
+    std::println("delete echoserver。");
     exit(0); 
 }
 
@@ -26,8 +26,8 @@ int main(int argc,char *argv[])
 {
     if (argc != 3) 
     { 
-        printf("usage: ./echoserver ip port\n"); 
-        printf("example: ./echoserver 192.168.150.128 5085\n\n"); 
+        std::println("usage: ./echoserver ip port"); 
+        std::println("example: ./echoserver 192.168.150.128 5085\n"); 
         return -1; 
     }
 

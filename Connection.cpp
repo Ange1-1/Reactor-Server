@@ -14,7 +14,6 @@ Connection::Connection(EventLoop* loop,std::unique_ptr<Socket> clientsock)
 
 Connection::~Connection()
 {
-    // printf("conn已析构。\n");
 }
 
 int Connection::fd() const                              // 返回客户端的fd。
@@ -94,7 +93,6 @@ void Connection::onmessage()
                 message=inputbuffer_.pickmessage();
                 if (!message.has_value()) break;
 
-                // printf("message (fd=%d):%s\n",fd(),message.c_str());
                 lastatime_=Timestamp::now();             // 更新Connection的时间戳。
 
                 onmessagecallback_(shared_from_this(),message.value());       // 回调TcpServer::onmessage()处理客户端的请求消息。
@@ -112,18 +110,16 @@ void Connection::onmessage()
 // 发送数据，不管在任何线程中，都是调用此函数发送数据。
 void Connection::send(std::string_view data)        
 {
-    if (disconnect_==true) {  printf("客户端连接已断开了，send()直接返回。\n"); return;}
+    if (disconnect_==true) {  std::println("客户端连接已断开了，send()直接返回。"); return;}
 
     if (loop_->isinloopthread())   // 判断当前线程是否为事件循环线程（IO线程）。
     {
         // 如果当前线程是IO线程，直接调用sendinloop()发送数据。
-        // printf("send() 在事件循环的线程中。\n");
         sendinloop(std::string(data));
     }
     else
     {
         // 如果当前线程不是IO线程，调用EventLoop::queueinloop()，把sendinloop()交给事件循环线程去执行。
-        // printf("send() 不在事件循环的线程中。\n");
         loop_->queueinloop([this,data=std::string(data)](){this->sendinloop(data);});
     }
 }
