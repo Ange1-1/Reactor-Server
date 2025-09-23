@@ -49,24 +49,32 @@ int main(int argc, char *argv[])
     {
         std::string message="这是第"+std::to_string(ii)+"个超级女生。";//创建一个消息
         int len = message.size();//消息长度
-        std::vector<std::byte> buf(4+len);//缓冲区:头部+内容
         
-
+        /* 使用byte数组来构建缓冲区，二进制专用，但更推荐用string
+        std::vector<std::byte> buf(4+len);//缓冲区:头部+内容
         //拼接头部
         memcpy(buf.data(), &len, 4);
         //拼接内容
         memcpy(buf.data()+4, message.c_str(), len);
-
         send(sockfd, buf.data(), len+4, 0); // 把请求报文发送给服务端。
-
         recv(sockfd, &len, 4, 0); // 先读取4字节的报文头部。
-
         buf.resize(len);//重新分配缓冲区大小
         recv(sockfd,buf.data(), len, 0);//读取内容
-
         message = std::string(buf.begin(), buf.end());//转为字符串
+        */
 
-        std::println("recv:{}", message.c_str());
+        // 使用 std::string 来构建缓冲区，更安全简洁
+        std::string buf;
+        buf.append(reinterpret_cast<const char*>(&len), sizeof(len));
+        buf.append(message);
+        send(sockfd, buf.data(), buf.size(), 0); // 把请求报文发送给服务端。
+        recv(sockfd, &len, 4, 0); // 先读取4字节的报文头部。
+        message.resize(len); // 调整字符串大小以容纳接收的数据
+        recv(sockfd, message.data(), len, 0);//读取内容
+
+
+        std::println("recv:{}", message);
+       
     }
     std::println("结束时间：{}", time(0));
 }
