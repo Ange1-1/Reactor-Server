@@ -37,15 +37,6 @@ ThreadPool::ThreadPool(size_t threadnum,std::string_view threadtype):stop_(false
     }
 }
 
-void ThreadPool::addtask(std::function<void()> task)
-{
-    {   // 锁作用域的开始。 ///////////////////////////////////
-        std::lock_guard<std::mutex> lock(mutex_);
-        taskqueue_.push(task);
-    }   // 锁作用域的结束。 ///////////////////////////////////
-
-    condition_.notify_one();   // 唤醒一个线程。
-}
 
 // 停止线程。
 void ThreadPool::stop()

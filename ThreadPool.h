@@ -28,8 +28,16 @@ public:
 	ThreadPool(size_t threadnum,std::string_view threadtype);
 
     // 把任务添加到队列中。
-    void addtask(std::function<void()> task);   
+	template<typename F>
+	void addtask(F&& task)
+	{
+			{   // 锁作用域的开始。 ///////////////////////////////////
+					std::lock_guard<std::mutex> lock(mutex_);
+					taskqueue_.emplace(std::forward<F>(task));
+			}   // 锁作用域的结束。 ///////////////////////////////////
 
+			condition_.notify_one();   // 唤醒一个线程。
+	}
 	// 获取线程池的大小。
 	size_t size();
 
