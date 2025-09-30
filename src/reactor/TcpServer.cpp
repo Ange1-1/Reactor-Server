@@ -1,0 +1,163 @@
+#include "reactor/TcpServer.h"
+
+TcpServer::TcpServer(std::string_view ip,const uint16_t port,int threadnum)
+                 :threadnum_(threadnum),mainloop_( std::make_unique<EventLoop>(true)), 
+                  acceptor_(mainloop_.get(),ip,port),threadpool_(threadnum_,"IO")
+{
+    // 设置epoll_wait()超时的回调函数。
+    mainloop_->setepolltimeoutcallback([this](EventLoop* loop){this->epolltimeout(loop);});
+
+    // 设置处理新客户端连接请求的回调函数。
+    acceptor_.setnewconnectioncb([this](std::unique_ptr<Socket> clientsock){this->newconnection(std::move(clientsock));});
+
+    // 创建从事件循环。
+    for (int ii=0;ii<threadnum_;ii++)
+    {
+        subloops_.emplace_back(std::make_unique<EventLoop>(false,5,10));              // 创建从事件循环，存入subloops_容器中。
+        subloops_[ii]->setepolltimeoutcallback([this](EventLoop* loop){this->epolltimeout(loop);});   // 设置timeout超时的回调函数。
+        subloops_[ii]->settimercallback([this](int fd){this->removeconn(fd);});   // 设置清理空闲TCP连接的回调函数。
+        threadpool_.addtask([this,ii](){this->subloops_[ii]->run();});    // 在线程池中运行从事件循环。
+
+    }
+}
+
+TcpServer::~TcpServer()
+{
+}
+
+// 运行事件循环。
+void TcpServer::start()          
+{
+    mainloop_->run();
+}
+
+ // 停止IO线程和事件循环。
+ void TcpServer::stop()          
+ {
+    // 停止主事件循环。
+    mainloop_->stop();
+    std::println("主事件循环已停止。");
+
+    // 停止从事件循环。
+    for (int ii=0;ii<threadnum_;ii++)
+    {
+        subloops_[ii]->stop();
+    }
+    std::println("从事件循环已停止。");
+
+    // 停止IO线程。
+    threadpool_.stop();
+    std::println("IO线程池停止。");
+ }
+
+
+// 处理新客户端连接请求。
+void TcpServer::newconnection(std::unique_ptr<Socket> clientsock)
+{
+    // 把新建的conn分配给从事件循环。
+    int fd=clientsock->fd();
+    spConnection conn(std::make_shared<Connection>(subloops_[fd%threadnum_].get(),std::move(clientsock)));   
+    conn->setclosecallback([this](spConnection conn){this->closeconnection(conn);});
+    conn->seterrorcallback([this](spConnection conn){this->errorconnection(conn);});
+    conn->setonmessagecallback([this](spConnection conn,std::string &message){this->onmessage(conn,message);});
+    conn->setsendcompletecallback([this](spConnection conn){this->sendcomplete(conn);});
+
+    //conn->enablereading();
+
+
+    {
+        std::lock_guard<std::mutex> gd(mmutex_);
+        conns_[conn->fd()]=conn;            // 把conn存放到TcpSever的map容器中。
+    }
+    subloops_[conn->fd()%threadnum_]->newconnection(conn);       // 把conn存放到EventLoop的map容器中。
+
+    if (newconnectioncb_) newconnectioncb_(conn);             // 回调上层业务类的HandleNewConnection()。
+}
+
+ // 关闭客户端的连接，在Connection类中回调此函数。 
+ void TcpServer::closeconnection(spConnection conn)
+ {
+    if (closeconnectioncb_) closeconnectioncb_(conn);       // 回调上层业务类的HandleClose()。
+
+    {
+         std::lock_guard<std::mutex> gd(mmutex_);
+        conns_.erase(conn->fd());        // 从map中删除conn。
+    }
+ }
+
+// 客户端的连接错误，在Connection类中回调此函数。
+void TcpServer::errorconnection(spConnection conn)
+{
+    if (errorconnectioncb_) errorconnectioncb_(conn);     // 回调上层业务类的HandleError()。
+
+    {
+         std::lock_guard<std::mutex> gd(mmutex_);
+        conns_.erase(conn->fd());      // 从map中删除conn。
+    }
+}
+
+// 处理客户端的请求报文，在Connection类中回调此函数。
+void TcpServer::onmessage(spConnection conn,std::string& message)
+{
+    if (onmessagecb_) onmessagecb_(conn,message);     // 回调上层业务类的HandleMessage()。
+}
+
+// 数据发送完成后，在Connection类中回调此函数。
+void TcpServer::sendcomplete(spConnection conn)     
+{
+
+    if (sendcompletecb_) sendcompletecb_(conn);     // 回调上层业务类的HandleSendComplete()。
+}
+
+// epoll_wait()超时，在EventLoop类中回调此函数。
+void TcpServer::epolltimeout(EventLoop *loop)         
+{
+
+    if (timeoutcb_)  timeoutcb_(loop);           // 回调上层业务类的HandleTimeOut()。
+}
+
+void TcpServer::setnewconnectioncb(std::function<void(spConnection)> fn)
+{
+    newconnectioncb_=fn;
+}
+
+void TcpServer::setcloseconnectioncb(std::function<void(spConnection)> fn)
+{
+    closeconnectioncb_=fn;
+}
+
+void TcpServer::seterrorconnectioncb(std::function<void(spConnection)> fn)
+{
+    errorconnectioncb_=fn;
+}
+
+void TcpServer::setonmessagecb(std::function<void(spConnection,std::string &message)> fn)
+{
+    onmessagecb_=fn;
+}
+
+void TcpServer::setsendcompletecb(std::function<void(spConnection)> fn)
+{
+    sendcompletecb_=fn;
+}
+
+void TcpServer::settimeoutcb(std::function<void(EventLoop*)> fn)
+{
+    timeoutcb_=fn;
+}
+
+// 删除conns_中的Connection对象，在EventLoop::handletimer()中将回调此函数。
+void TcpServer::removeconn(int fd)                 
+{
+    {
+        std::lock_guard<std::mutex> gd(mmutex_);
+        conns_.erase(fd);          // 从map中删除conn。
+    }
+
+    if (removeconnectioncb_) removeconnectioncb_(fd);
+}
+
+void TcpServer::setremoveconnectioncb(std::function<void(int)> fn)
+{
+    removeconnectioncb_=fn;
+}
